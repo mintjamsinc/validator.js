@@ -1,4 +1,4 @@
-// ValidatorEngine.js
+// Copyright (c) 2025 MintJams Inc. Licensed under MIT License.
 
 const TYPE_CONVERSION_ERROR = Symbol('TYPE_CONVERSION_ERROR');
 
