@@ -4,7 +4,7 @@
 
 ## ✨ Features
 
-* ✅ Schema-based validation structure (JSON format)
+* ✅ Schema-based validation
 * 🌐 Built-in i18n with fallback support
 * 🧩 Supports field-level and cross-field validation
 * 🔧 Custom rule registration supported
