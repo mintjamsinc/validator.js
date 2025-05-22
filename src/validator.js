@@ -142,7 +142,26 @@ Validator.registerRule('max', (value, limit) => {
 	return false;
 });
 Validator.registerRule('pattern', (value, regex) => new RegExp(regex).test(value));
-Validator.registerRule('format', (value, fmt) => typeof value === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(value));
+Validator.registerRule('format', (value, fmt) => {
+	if (typeof value !== 'string') return false;
+
+	const patterns = {
+		'YYYY/MM/DD': /^\d{4}\/\d{2}\/\d{2}$/,
+		'YYYY-MM-DD': /^\d{4}-\d{2}-\d{2}$/,
+		'YYYYMMDD': /^\d{8}$/,
+		'YYYYMMDDHHmmss': /^\d{14}$/,
+		'ISO8601': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(Z|[\+\-]\d{2}:\d{2})?$/,
+		'UNIX_MS': /^\d{10,13}$/,
+		'TIMESTAMP_MS': /^\d{10,13}$/,
+		'HH:mm:ss': /^\d{2}:\d{2}:\d{2}$/,
+		'HHmmss': /^\d{6}$/,
+	};
+
+	const pattern = patterns[fmt];
+	if (!pattern) return false; // 未定義の書式はNG
+
+	return pattern.test(value);
+});
 Validator.registerRule('enum', (value, list) => Array.isArray(list) && list.includes(value));
 
 export class SchemaRegistry {

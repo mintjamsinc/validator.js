@@ -155,6 +155,22 @@ ValidatorJS includes the following built-in rules. These rules can be applied di
 > 💡 **Note**: Custom rules can be added using `Validator.registerRule(name, fn)`.
 > See [🔧 Register Custom Rule](#-register-custom-rule) for examples.
 
+### format Rule Values
+
+The `format` rule supports the following built-in formats:
+
+| Format Name        | Example Value           | Description                                                      |
+|--------------------|-------------------------|------------------------------------------------------------------|
+| `YYYY/MM/DD`       | `2025/05/22`            | A date in slash-separated year/month/day format.                |
+| `YYYY-MM-DD`       | `2025-05-22`            | A date in ISO-style hyphen-separated format.                    |
+| `YYYYMMDD`         | `20250522`              | A compact date without separators.                              |
+| `YYYYMMDDHHmmss`   | `20250522143000`        | A compact datetime with 14 digits (YMDHMS).                     |
+| `HH:mm:ss`         | `14:30:00`              | A colon-separated time format.                                  |
+| `HHmmss`           | `143000`                | A compact 6-digit time format (HHMMSS).                         |
+| `ISO8601`          | `2025-05-22T14:30:00Z`  | ISO 8601 datetime with optional milliseconds and timezone.      |
+| `TIMESTAMP_MS`     | `1716369000000`         | Number of milliseconds since the UNIX epoch (Jan 1, 1970 UTC).  |
+| `UNIX_MS`          | `1716369000000`         | Alias of TIMESTAMP_MS.                                          |
+
 ### Supported `type` values
 
 | Type    | Description                                                              |
