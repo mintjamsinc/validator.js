@@ -152,7 +152,7 @@ ValidatorJS includes the following built-in rules. These rules can be applied di
 | `max`       | Checks that the value is less than or equal to the specified maximum (for numbers or dates).      | `number`, `date`   |
 | `enum`      | Checks that the value is included in the allowed list of values.                                  | All                |
 
-> 💡 **Note**: The `format` rule supports multiple common formats. See the [📐 format Rule Values](#format-rule-values) section below for a complete list.
+> 💡 **Note**: The `format` rule supports multiple common formats. See the [📐 format Rule Values](#-format-rule-values) section below for a complete list.
 >
 > 🛠️ Custom rules can be added using `Validator.registerRule(name, fn)`. See [🔧 Register Custom Rule](#-register-custom-rule) for details.
 
