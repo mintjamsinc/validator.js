@@ -36,6 +36,8 @@ function convertByType(value, type) {
 				if (isNaN(date.getTime())) throw new Error('Invalid Date');
 				return date;
 			case 'string':
+				if (value == null) return '';
+				return String(value);
 			default:
 				return value;
 		}
@@ -44,26 +46,24 @@ function convertByType(value, type) {
 	}
 }
 
-export class ValidatorEngine {
+export class Validator {
 	#schema;
-	#locale;
 	#errors;
 	#crossErrors;
 	static #rules = {};
 
-	constructor(schema, locale = 'ja') {
+	constructor(schema) {
 		this.#schema = schema;
-		this.#locale = locale;
 		this.#errors = {}; // { fieldName: [message1, ...] }
 		this.#crossErrors = []; // [{ type: 'crossField', fields: [...], target, message }]
 	}
 
-	validate(formData) {
+	validate(formData, locale = 'en') {
 		this.#errors = {};
 		this.#crossErrors = [];
 
 		const fields = this.#schema.fields || {};
-		const rules = ValidatorEngine.#rules;
+		const rules = Validator.#rules;
 
 		for (const [field, config] of Object.entries(fields)) {
 			const rawValue = formData[field];
@@ -73,7 +73,7 @@ export class ValidatorEngine {
 			const context = { ...config, value };
 
 			if (value === TYPE_CONVERSION_ERROR) {
-				const message = getErrorMessage(messages, 'type', this.#locale, context);
+				const message = getErrorMessage(messages, 'type', locale, context);
 				this.#addError(field, message);
 				continue;
 			}
@@ -84,7 +84,7 @@ export class ValidatorEngine {
 				const passed = rule(value, ruleOption);
 
 				if (!passed) {
-					const message = getErrorMessage(messages, ruleName, this.#locale, context);
+					const message = getErrorMessage(messages, ruleName, locale, context);
 					this.#addError(field, message);
 				}
 			}
@@ -93,7 +93,7 @@ export class ValidatorEngine {
 		for (const rule of this.#schema.crossFieldValidations || []) {
 			const passed = this.#evalRule(rule.rule, formData);
 			if (!passed) {
-				const message = getErrorMessage(rule.message, rule.target || 'default', this.#locale, formData);
+				const message = getErrorMessage(rule.message, rule.target || 'default', locale, formData);
 				const target = rule.target || rule.fields?.[0];
 				this.#crossErrors.push({ type: 'crossField', fields: rule.fields, target, message });
 				this.#addError(target, message);
@@ -128,19 +128,51 @@ export class ValidatorEngine {
 	}
 }
 
-ValidatorEngine.registerRule('required', (value) => value != null && value !== '');
-ValidatorEngine.registerRule('minLength', (value, len) => typeof value === 'string' && value.length >= len);
-ValidatorEngine.registerRule('maxLength', (value, len) => typeof value === 'string' && value.length <= len);
-ValidatorEngine.registerRule('min', (value, limit) => {
+Validator.registerRule('required', (value) => value != null && value !== '');
+Validator.registerRule('minLength', (value, len) => typeof value === 'string' && value.length >= len);
+Validator.registerRule('maxLength', (value, len) => typeof value === 'string' && value.length <= len);
+Validator.registerRule('min', (value, limit) => {
 	if (value instanceof Date && !isNaN(value)) return value >= new Date(limit);
 	if (typeof value === 'number') return value >= limit;
 	return false;
 });
-ValidatorEngine.registerRule('max', (value, limit) => {
+Validator.registerRule('max', (value, limit) => {
 	if (value instanceof Date && !isNaN(value)) return value <= new Date(limit);
 	if (typeof value === 'number') return value <= limit;
 	return false;
 });
-ValidatorEngine.registerRule('pattern', (value, regex) => new RegExp(regex).test(value));
-ValidatorEngine.registerRule('format', (value, fmt) => typeof value === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(value));
-ValidatorEngine.registerRule('enum', (value, list) => Array.isArray(list) && list.includes(value));
+Validator.registerRule('pattern', (value, regex) => new RegExp(regex).test(value));
+Validator.registerRule('format', (value, fmt) => typeof value === 'string' && /^\d{4}\/\d{2}\/\d{2}$/.test(value));
+Validator.registerRule('enum', (value, list) => Array.isArray(list) && list.includes(value));
+
+export class SchemaRegistry {
+	#schemas = new Map();
+
+	register(key, schema) {
+		this.#schemas.set(key, schema);
+	}
+
+	createValidator(key) {
+		const schema = this.#schemas.get(key);
+		if (!schema) {
+			throw new Error(`Schema not found: ${key}`);
+		}
+		return new Validator(schema);
+	}
+
+	getSchema(key) {
+		return this.#schemas.get(key);
+	}
+
+	has(key) {
+		return this.#schemas.has(key);
+	}
+
+	unregister(key) {
+		this.#schemas.delete(key);
+	}
+
+	get keys() {
+		return [...this.#schemas.keys()];
+	}
+}
