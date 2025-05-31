@@ -12,10 +12,10 @@ function getErrorMessage(messages, ruleName, locale, context) {
 	const defaultMsgs = messages?.['default'];
 
 	return (
-		interpolate(ruleMsgs?.[locale], context) ??
-		interpolate(ruleMsgs?.['default'], context) ??
-		interpolate(defaultMsgs?.[locale], context) ??
-		interpolate(defaultMsgs?.['default'], context) ??
+		interpolate(ruleMsgs?.[locale], context) ||
+		interpolate(ruleMsgs?.['default'], context) ||
+		interpolate(defaultMsgs?.[locale], context) ||
+		interpolate(defaultMsgs?.['default'], context) ||
 		`[${ruleName}] validation failed`
 	);
 }
